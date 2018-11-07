@@ -113,9 +113,46 @@ def createArgParser():
 	parser.add_argument('-p','--project',action='store_true',help="Initialize a C++ project in the current directory.")
 	parser.add_argument('--release',action='store_true',help="Set the makefile in order to produce a release binary.")
 	parser.add_argument('--debug',action='store_true',help="Set the makefile to produce a debug binary.")
+	parser.add_argument('-a','--all',action='store_true',help="Add all source files that are not in the makefile into it.")
+	parser.add_argument('-i','--importFile',action='store_true',help="Add file to the makefile.")
 
 
 	return parser
+def getAllCurrentFile():
+	"""
+	Return a list containing all current file compiled by the makefile
+	"""
+	with open('./makefile',"r") as file:
+		for line in file:
+			if "OBJ_FILES = " in line:
+				return re.search("\\$\\(OBJECTS\\)(.*?)\\.o",line).groups()
+	pass
+
+def importAll():
+	"""
+	Add all source file that are in the makefile into it.
+	"""
+	gr = getAllCurrentFile()
+	src = getCppFiles()
+	for file in src:
+		if file.endswith(".cpp") and not(file.replace(".cpp","") in gr):
+			addToMakefile(file.replace(".cpp",""))
+	pass
+
+def importFile(name):
+	"""
+	Add a file to the makefile.
+	:param name: Name of the file to add.
+	"""
+	if(name.endswith):
+		src = getCppFiles()
+		if(name+".cpp" in src):
+			addToMakefile(name)
+		else:
+			print("Error : "+name+" is not a source file.")
+	else:
+		print("Error : "+name+" is not a source file.")
+	pass
 
 def setRelease():
 	"""
@@ -257,8 +294,8 @@ def suppFile(name):
 		os.remove("./"+name+".h")
 	if os.path.exists("./"+name+".cpp"):
 		os.remove("./"+name+".cpp")
-	temp_o = "\\$\\(OBJECTS\\)"+name+"\\.o"
-	eraseOccurence(temp_o,'./makefile')
+	temp_o = "\\$\\(OBJECTS\\)"+"\\.o"
+	eraseOccurence(temp_o,'./makefilAdd all source file that are in the makefile into it.')
 	for f in getCppFiles():
 		eraseOccurence("\\s*\\#\\s*include\\s*\""+name+".h\"",f)
 
@@ -292,6 +329,8 @@ def main():
 	project = args.project
 	release = args.release
 	debug =args.debug
+	importA = args.all
+	imp = args.importFile
 	if(project == False and Erase == False and rename==None and name != "" and not(name is None)):
 		if(noSource == False):
 			SourceHeader(name)
@@ -308,6 +347,10 @@ def main():
 			setRelease()
 		if(debug):
 			setDebug()
+		if(imp):
+			addToMakefile(name)
+		if(importA):
+			importAll()
 	pass
 
 if __name__=='__main__':
