@@ -11,7 +11,7 @@ In order to install the command for the user just clone the repository and use m
 
 ```bash
 git clone https://github.com/CuadrosNicolas/VSCppManager
-cd ./VSCPP
+cd ./VSCppManager
 make install
 ```
 
