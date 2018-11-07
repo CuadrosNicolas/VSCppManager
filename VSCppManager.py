@@ -97,7 +97,8 @@ int main(int argc,char* argv[])
 {
 	return 0;
 }"""
-
+debugFlags = "CFLAGS = -Wall -std=c++1z -g"
+releaseFlags = "CFLAGS = -Wall -std=c++1z"
 """
 PROGRAM
 """
@@ -106,15 +107,46 @@ def createArgParser():
 	Create the arguments of the command.
 	"""
 	parser = argparse.ArgumentParser(description="Program used to create C++ project and manage source files.")
-	parser.add_argument('name', metavar='N', type=str,help="Name of files/project.")
+	parser.add_argument('name', metavar='N',nargs="?", type=str,help="Name of files/project.")
 	parser.add_argument('-n','--noSource',action='store_true',help="Add only a header file.")
 	parser.add_argument('-e','--erase',action='store_true',help="Erase the file and all his references in the other files")
 	parser.add_argument('-r','--rename',type=str,help="Rename the file and all his references in the other files")
 	parser.add_argument('-p','--project',action='store_true',help="Initialize a C++ project in the current directory.")
+	parser.add_argument('--release',action='store_true',help="Set the makefile in order to produce a release binary.")
+	parser.add_argument('--debug',action='store_true',help="Set the makefile to produce a debug binary.")
 
 
 	return parser
 
+def setRelease():
+	"""
+	Change the CFLAGS variable in the makefile in order to remove the -g compiler flag.
+	"""
+	temp = ""
+	with open('./makefile',"r") as file:
+		for line in file:
+			if("CFLAGS" in line):
+				temp += releaseFlags+"\n"
+			else:
+				temp+= line
+	with open('./makefile','w+') as out:
+		out.write(temp)
+	pass
+
+def setDebug():
+	"""
+	Change the CFLAGS variable in the makefile in order to add the -g compiler flag.
+	"""
+	temp = ""
+	with open('./makefile',"r") as file:
+		for line in file:
+			if("CFLAGS" in line):
+				temp += debugFlags+"\n"
+			else:
+				temp+= line
+	with open('./makefile','w+') as out:
+		out.write(temp)
+	pass
 
 def buildVScode(name):
 	"""
@@ -259,7 +291,9 @@ def main():
 	noSource = args.noSource
 	rename=args.rename
 	project = args.project
-	if(project == False and Erase == False and rename==None):
+	release = args.release
+	debug =args.debug
+	if(project == False and Erase == False and rename==None and name != "" and not(name is None)):
 		if(noSource == False):
 			SourceHeader(name)
 		else:
@@ -271,6 +305,10 @@ def main():
 			renameFile(name,rename)
 		if(project):
 			buildVScode(name)
+		if(release):
+			setRelease()
+		if(debug):
+			setDebug()
 	pass
 
 if __name__=='__main__':

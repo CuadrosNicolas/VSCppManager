@@ -51,6 +51,22 @@ VSCppManager file -e
 
 This command will also erase all references to this file in the others.
 
+### Set compiling mode
+
+Change the makefile in order to produce a release binary :
+
+```bash
+VSCppManager --release
+```
+
+Change the makefile in order to produce a debug binary :
+
+```bash
+VSCppManager --debug
+```
+
+By default the makefile produce a debug binary.
+
 ## Author
 
-Cuadros Nicolas
+[```Cuadros Nicolas```](https://github.com/Inagaroth)
