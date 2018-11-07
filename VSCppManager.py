@@ -197,8 +197,9 @@ def buildVScode(name):
 		json.dump(vscode_launch,outfile)
 	with open('./.vscode/tasks.json','w') as outfile:
 		json.dump(vscode_tasks,outfile)
-	with open('./main.cpp','w') as outfile:
-		outfile.write(MAIN)
+	if not os.path.exists("./main.cpp"):
+		with open('./main.cpp','w') as outfile:
+			outfile.write(MAIN)
 	with open('./makefile','w') as outfile:
 		outfile.write(makefile_begin+name+"\n"+makefile_end)
 
@@ -238,15 +239,18 @@ def addToMakefile(name):
 	Add a new source file to compile in the makefile
 	:param name: Name of the source file
 	"""
-	temp = ""
-	with open('./makefile',"r") as file:
-		for line in file:
-			if("OBJ_FILES = " in line):
-				temp += line.replace('\n','') + " $(OBJECTS)"+name+".o\n"
-			else:
-				temp+= line
-	with open('./makefile','w+') as out:
-		out.write(temp)
+	if os.path.exists("./"+name+".cpp"):
+		temp = ""
+		with open('./makefile',"r") as file:
+			for line in file:
+				if("OBJ_FILES = " in line):
+					temp += line.replace('\n','') + " $(OBJECTS)"+name+".o\n"
+				else:
+					temp+= line
+		with open('./makefile','w+') as out:
+			out.write(temp)
+	else:
+		print("Error : "+name+" does not exist or is not a source file.")
 	pass
 
 def addHeader(name):
