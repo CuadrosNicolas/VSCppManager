@@ -40,8 +40,7 @@ vscode_launch = {
 			"MIMode": "gdb",
 			"setupCommands": [
 				{
-					"description": "Enable pretty-printing for gdb",
-					"text": "-enable-pretty-printing",
+					"description": "Build and Launch the project",
 					"ignoreFailures": True
 				}
 			],
