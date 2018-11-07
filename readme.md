@@ -10,7 +10,7 @@ for Visual Studio Code.
 In order to install the command for the user just clone the repository and use make.
 
 ```bash
-git clone
+git clone https://github.com/CuadrosNicolas/VSCppManager
 cd ./VSCPP
 make install
 ```
