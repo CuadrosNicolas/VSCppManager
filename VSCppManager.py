@@ -125,7 +125,7 @@ def getAllCurrentFile():
 	with open('./makefile',"r") as file:
 		for line in file:
 			if "OBJ_FILES = " in line:
-				return re.search("\\$\\(OBJECTS\\)(.*?)\\.o",line).groups()
+				return re.findall("\\$\\(OBJECTS\\)(.*?)\\.o",line)
 	pass
 
 def importAll():
