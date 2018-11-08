@@ -28,7 +28,7 @@ vscode_launch = {
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "(gdb) Launch",
+			"name": "Launch ",
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/bin/",
@@ -41,6 +41,7 @@ vscode_launch = {
 			"setupCommands": [
 				{
 					"description": "Build and Launch the project",
+					"text": "-enable-pretty-printing",
 					"ignoreFailures": True
 				}
 			],
@@ -107,14 +108,14 @@ def createArgParser():
 	"""
 	parser = argparse.ArgumentParser(description="Program used to create C++ project and manage source files.")
 	parser.add_argument('name', metavar='N',nargs="?", type=str,help="Name of files/project.")
+	parser.add_argument('-p','--project',action='store_true',help="Initialize a C++ project in the current directory.")
 	parser.add_argument('-n','--noSource',action='store_true',help="Add only a header file.")
 	parser.add_argument('-e','--erase',action='store_true',help="Erase the file and all his references in the other files")
 	parser.add_argument('-r','--rename',type=str,help="Rename the file and all his references in the other files")
-	parser.add_argument('-p','--project',action='store_true',help="Initialize a C++ project in the current directory.")
-	parser.add_argument('--release',action='store_true',help="Set the makefile in order to produce a release binary.")
-	parser.add_argument('--debug',action='store_true',help="Set the makefile to produce a debug binary.")
 	parser.add_argument('-a','--all',action='store_true',help="Add all source files that are not in the makefile into it.")
 	parser.add_argument('-i','--importFile',action='store_true',help="Add file to the makefile.")
+	parser.add_argument('--release',action='store_true',help="Set the makefile in order to produce a release binary.")
+	parser.add_argument('--debug',action='store_true',help="Set the makefile to produce a debug binary.")
 
 
 	return parser
@@ -194,7 +195,9 @@ def buildVScode(name):
 		os.makedirs("./.vscode")
 	vscode_launch["configurations"][0]["program"]+=name
 	with open('./.vscode/launch.json','w') as outfile:
-		json.dump(vscode_launch,outfile)
+		TempLaunch = vscode_launch
+		TempLaunch["configurations"][0]["name"] += name
+		json.dump(TempLaunch,outfile)
 	with open('./.vscode/tasks.json','w') as outfile:
 		json.dump(vscode_tasks,outfile)
 	if not os.path.exists("./main.cpp"):
@@ -240,15 +243,17 @@ def addToMakefile(name):
 	:param name: Name of the source file
 	"""
 	if os.path.exists("./"+name+".cpp"):
-		temp = ""
-		with open('./makefile',"r") as file:
-			for line in file:
-				if("OBJ_FILES = " in line):
-					temp += line.replace('\n','') + " $(OBJECTS)"+name+".o\n"
-				else:
-					temp+= line
-		with open('./makefile','w+') as out:
-			out.write(temp)
+		gr = getAllCurrentFile()
+		if(not name in gr):
+			temp = ""
+			with open('./makefile',"r") as file:
+				for line in file:
+					if("OBJ_FILES = " in line):
+						temp += line.replace('\n','') + " $(OBJECTS)"+name+".o\n"
+					else:
+						temp+= line
+			with open('./makefile','w+') as out:
+				out.write(temp)
 	else:
 		print("Error : "+name+" does not exist or is not a source file.")
 	pass
@@ -258,8 +263,9 @@ def addHeader(name):
 	Create a new Header file
 	:param name: Name of the file
 	"""
-	with open(name+".h","w+") as out:
-		out.write("#pragma once\n")
+	if not os.path.exists("./"+name+".h"):
+		with open(name+".h","w+") as out:
+			out.write("#pragma once\n")
 	pass
 
 def addSource(name):
@@ -267,8 +273,9 @@ def addSource(name):
 	Create a new source file
 	:param name: Name of the file
 	"""
-	with open(name+".cpp","w+") as out:
-		out.write("#include \""+name+".h"+"\"\n")
+	if not os.path.exists("./"+name+".cpp"):
+		with open(name+".cpp","w+") as out:
+			out.write("#include \""+name+".h"+"\"\n")
 	pass
 
 def NoSource(name):
@@ -319,7 +326,11 @@ def renameFile(name,newName):
 	for f in getCppFiles():
 		replaceOccurence("\\s*\\#\\s*include\\s*\""+name+".h\"","#include \""+newName+".h\"",f)
 	pass
-
+def testGiveAName(var):
+	if(var != ""):
+		return True
+	else:
+		print("Error : you need to give a name.")
 def main():
 	"""
 	Main function
@@ -335,6 +346,7 @@ def main():
 	debug =args.debug
 	importA = args.all
 	imp = args.importFile
+	#Adding files
 	if(project == False and Erase == False and rename==None and name != "" and not(name is None)):
 		if(noSource == False):
 			SourceHeader(name)
@@ -344,15 +356,18 @@ def main():
 		if(Erase):
 			suppFile(name)
 		if(not rename is None):
-			renameFile(name,rename)
+			if(testGiveAName(name)):
+				renameFile(name,rename)
 		if(project):
-			buildVScode(name)
+			if(testGiveAName(name)):
+				buildVScode(name)
 		if(release):
 			setRelease()
 		if(debug):
 			setDebug()
 		if(imp):
-			addToMakefile(name)
+			if(testGiveAName(name)):
+				addToMakefile(name)
 		if(importA):
 			importAll()
 	pass
