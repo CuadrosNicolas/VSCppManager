@@ -133,11 +133,10 @@ def importAll():
 	"""
 	Add all source file that are in the makefile into it.
 	"""
-	gr = getAllCurrentFile()
-	src = getCppFiles()
-	for file in src:
-		if file.endswith(".cpp") and not(file.replace(".cpp","") in gr):
-			addToMakefile(file.replace(".cpp",""))
+	temp = [file.replace(".cpp","") for file in getCppFiles() if file.endswith(".cpp")]
+	current =set(getAllCurrentFile())
+	src = [file for file in temp if file not in current]
+	map(addToMakefile,src)
 	pass
 
 def importFile(name):
@@ -226,7 +225,7 @@ def replaceOccurence(previous,new,file):
 	temp =""
 	with open(file,"r") as f:
 		for line in f:
-				temp += re.sub(previous,new,line)
+			temp += re.sub(previous,new,line)
 	with open(file,'w+') as out:
 		out.write(temp)
 	pass
