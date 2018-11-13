@@ -135,8 +135,7 @@ def importAll():
 	"""
 	temp = [file.replace(".cpp","") for file in getCppFiles() if file.endswith(".cpp")]
 	current =set(getAllCurrentFile())
-	src = [file for file in temp if file not in current]
-	map(addToMakefile,src)
+	[addToMakefile(file) for file in temp if file not in current]
 	pass
 
 def importFile(name):
